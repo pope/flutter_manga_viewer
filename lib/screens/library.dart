@@ -13,8 +13,19 @@ class LibraryScreen extends StatelessWidget {
       body: Center(
         child: Consumer(
           builder: (context, ref, child) {
-            final String value = ref.watch(helloWorldProvider);
-            return Text(value);
+            final asyncTodos = ref.watch(libraryProvider);
+            return asyncTodos.when(
+              data: (lib) {
+                if (lib.isEmpty) {
+                  return const Text('Add some books!');
+                }
+                return const Text('Got something!');
+              },
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              error: (err, stackTrace) => Text('Error: $err'),
+            );
           },
         ),
       ),

@@ -19,6 +19,10 @@ class Library {
         ),
         version = json['version']!;
 
+  bool get isEmpty {
+    return books.isEmpty;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'version': version,
