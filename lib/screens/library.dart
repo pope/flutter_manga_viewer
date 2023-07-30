@@ -24,7 +24,9 @@ class LibraryScreen extends StatelessWidget {
               loading: () => const Center(
                 child: CircularProgressIndicator(),
               ),
-              error: (err, stackTrace) => Text('Error: $err'),
+              error: (err, stackTrace) => Center(
+                child: Text('Error: $err'),
+              ),
             );
           },
         ),

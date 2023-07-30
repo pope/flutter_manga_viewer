@@ -26,7 +26,7 @@ class Library {
   Map<String, dynamic> toJson() {
     return {
       'version': version,
-      'books': books.values.map((b) => b.toJson()),
+      'books': books.values.map((b) => b.toJson()).asList(),
     };
   }
 }
