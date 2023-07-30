@@ -13,8 +13,21 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LibraryScreen(),
+    return MaterialApp(
+      home: const LibraryScreen(),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          brightness: Brightness.dark,
+          seedColor: Colors.deepPurple,
+        ),
+        useMaterial3: true,
+      ),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          brightness: Brightness.light,
+          seedColor: Colors.deepPurple,
+        ),
+      ),
       title: 'Flutter Manga Viewer',
     );
   }
