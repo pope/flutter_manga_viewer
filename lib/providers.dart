@@ -9,8 +9,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 final libraryFileProvider = FutureProvider((ref) async {
-  var dir = await getApplicationDocumentsDirectory();
-  var name = p.join(dir.path, 'flutter_manga_viewer_library.json');
+  var dir = await getApplicationSupportDirectory();
+  var name = p.join(dir.path, 'library.json');
   return File(name);
 });
 
