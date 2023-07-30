@@ -13,10 +13,10 @@ class LibraryScreen extends StatelessWidget {
       body: Center(
         child: Consumer(
           builder: (context, ref, child) {
-            final asyncTodos = ref.watch(libraryProvider);
-            return asyncTodos.when(
-              data: (lib) {
-                if (lib.isEmpty) {
+            final books = ref.watch(sortedBooksProvider);
+            return books.when(
+              data: (books) {
+                if (books.isEmpty) {
                   return const Text('Add some books!');
                 }
                 return const Text('Got something!');
