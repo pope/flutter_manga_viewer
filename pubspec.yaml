@@ -8,10 +8,13 @@ environment:
 
 dependencies:
   archive: ^3.3.7
+  fast_immutable_collections: ^9.1.5
   file_picker: ^5.3.3
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.3.6
+  path: ^1.8.3
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:
