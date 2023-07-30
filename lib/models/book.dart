@@ -23,6 +23,12 @@ class Book {
         title = null,
         author = null;
 
+  Book.fromJson(Map<String, dynamic> json)
+      : id = json['id']!,
+        path = json['path']!,
+        author = json['author'],
+        title = json['title'];
+
   String get defaultTitle {
     return title ?? p.basenameWithoutExtension(path);
   }
@@ -37,5 +43,14 @@ class Book {
       author: author ?? this.author,
       title: title ?? this.title,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'path': path,
+      'author': author,
+      'title': title,
+    };
   }
 }
