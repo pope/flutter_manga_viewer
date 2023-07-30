@@ -26,4 +26,16 @@ class Book {
   String get defaultTitle {
     return title ?? p.basenameWithoutExtension(path);
   }
+
+  Book copyWith({
+    String? author,
+    String? title,
+  }) {
+    return Book(
+      id: id,
+      path: path,
+      author: author ?? this.author,
+      title: title ?? this.title,
+    );
+  }
 }
