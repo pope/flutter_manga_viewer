@@ -4,7 +4,7 @@ import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BookCardWidget extends StatelessWidget {
+class BookCardWidget extends ConsumerWidget {
   final Book book;
 
   const BookCardWidget({
@@ -13,8 +13,16 @@ class BookCardWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Text(book.defaultTitle);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bytes = ref.watch(getBookCover(book));
+    return Column(children: [
+      Image.memory(
+        bytes,
+        height: 350,
+        width: 250,
+      ),
+      Text(book.defaultTitle),
+    ]);
   }
 }
 
@@ -90,6 +98,8 @@ class LibraryWidget extends ConsumerWidget {
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 300.0,
+                childAspectRatio: .6,
+                crossAxisSpacing: 20.0,
               ),
               itemCount: books.length,
               itemBuilder: (BuildContext itemContext, int index) =>

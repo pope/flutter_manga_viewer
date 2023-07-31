@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/models/library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,11 +13,38 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 final addBooksControllerProvider =
-    StateNotifierProvider<AddBooksController, AsyncValue<void>>((ref) {
+    StateNotifierProvider.autoDispose<AddBooksController, AsyncValue<void>>(
+        (ref) {
   final libraryNotifier = ref.watch(libraryProvider.notifier);
   return AddBooksController(
     libraryNotifier: libraryNotifier,
   );
+});
+
+final getBookCover = Provider.autoDispose.family<Uint8List, Book>((ref, book) {
+  const extensions = ['.jpeg', '.jpg', '.png'];
+  // TODO(pope): Make this work with app sandbox on MacOS.
+  //
+  // I'm not sure if it's this exactly, or the file picker. What I observed
+  // was that when I used the file_picker, images would load. And the JSON
+  // referenced assets on my Desktop. However, when I restarted the app and
+  // didn't use the file picker, then I would get a file permissions error.
+  //
+  // When going to fix this, adjust the macOS entitlements back to:
+  //     <key>com.apple.security.app-sandbox</key>
+  //     <true/>
+  final inputStream = InputFileStream(book.path);
+  final archive = ZipDecoder().decodeBuffer(inputStream);
+  // TODO(pope): Add some error handling here.
+  // Specifically for when there aren't any images in this archive file.
+  final firstImage = archive
+      .where((file) => extensions.contains(p.extension(file.name)))
+      .reduce((winner, file) =>
+          winner.name.compareTo(file.name) <= 0 ? winner : file);
+  final outputStream = OutputStream();
+  firstImage.writeContent(outputStream);
+
+  return Uint8List.fromList(outputStream.getBytes());
 });
 
 final libraryFileProvider = FutureProvider((ref) async {
@@ -30,7 +60,8 @@ final librarySortTypeProvider = StateProvider(
   (ref) => LibrarySortType.none,
 );
 
-final sortedBooksProvider = FutureProvider<IList<Book>>((ref) async {
+final sortedBooksProvider =
+    FutureProvider.autoDispose<IList<Book>>((ref) async {
   final librarySortType = ref.watch(librarySortTypeProvider);
   final library = await ref.watch(libraryProvider.future);
 
@@ -93,7 +124,7 @@ class LibraryNotifier extends AsyncNotifier<Library> {
     }
 
     final newState = state.requireValue
-        .withNewBooks(result.files.map((f) => Book.create(path: f.path!)));
+        .withNewBooks(result.paths.map((path) => Book.create(path: path!)));
     await _save(newState);
     state = AsyncValue.data(newState);
   }

@@ -33,6 +33,17 @@ class Book {
     return title ?? p.basenameWithoutExtension(path);
   }
 
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      other is Book &&
+      other.id == id &&
+      other.path == path &&
+      other.author == author &&
+      other.title == title;
+
   Book copyWith({
     String? author,
     String? title,
