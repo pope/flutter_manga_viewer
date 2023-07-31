@@ -30,13 +30,13 @@ final librarySortTypeProvider = StateProvider(
   (ref) => LibrarySortType.none,
 );
 
-final sortedBooksProvider = FutureProvider<Iterable<Book>>((ref) async {
+final sortedBooksProvider = FutureProvider<IList<Book>>((ref) async {
   final librarySortType = ref.watch(librarySortTypeProvider);
   final library = await ref.watch(libraryProvider.future);
 
   switch (librarySortType) {
     case LibrarySortType.none:
-      return library.books.values;
+      return library.books.toValueIList();
     case LibrarySortType.title:
       return library.books.toValueIList(
         sort: true,

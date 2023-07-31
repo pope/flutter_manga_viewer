@@ -1,7 +1,22 @@
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class BookCardWidget extends StatelessWidget {
+  final Book book;
+
+  const BookCardWidget({
+    super.key,
+    required this.book,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(book.defaultTitle);
+  }
+}
 
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({
@@ -30,7 +45,7 @@ class LibraryScreen extends ConsumerWidget {
 }
 
 class LibraryWidget extends ConsumerWidget {
-  final Iterable<Book> books;
+  final IList<Book> books;
 
   const LibraryWidget({
     super.key,
@@ -70,7 +85,18 @@ class LibraryWidget extends ConsumerWidget {
               child: Text('Add some books!'),
             );
           }
-          return const Text('We have some things!');
+          return Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 300.0,
+              ),
+              itemCount: books.length,
+              itemBuilder: (BuildContext itemContext, int index) =>
+                  BookCardWidget(book: books[index]),
+              primary: true,
+            ),
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(
