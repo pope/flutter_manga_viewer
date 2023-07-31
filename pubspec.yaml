@@ -25,4 +25,6 @@ dev_dependencies:
   riverpod_lint: ^1.4.0
 
 flutter:
+  assets:
+    - assets/waiting.png
   uses-material-design: true

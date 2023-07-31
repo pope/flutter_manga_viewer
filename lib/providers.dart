@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/models/library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,30 +20,9 @@ final addBooksControllerProvider =
   );
 });
 
-final getBookCover = Provider.autoDispose.family<Uint8List, Book>((ref, book) {
-  const extensions = ['.jpeg', '.jpg', '.png'];
-  // TODO(pope): Make this work with app sandbox on MacOS.
-  //
-  // I'm not sure if it's this exactly, or the file picker. What I observed
-  // was that when I used the file_picker, images would load. And the JSON
-  // referenced assets on my Desktop. However, when I restarted the app and
-  // didn't use the file picker, then I would get a file permissions error.
-  //
-  // When going to fix this, adjust the macOS entitlements back to:
-  //     <key>com.apple.security.app-sandbox</key>
-  //     <true/>
-  final inputStream = InputFileStream(book.path);
-  final archive = ZipDecoder().decodeBuffer(inputStream);
-  // TODO(pope): Add some error handling here.
-  // Specifically for when there aren't any images in this archive file.
-  final firstImage = archive
-      .where((file) => extensions.contains(p.extension(file.name)))
-      .reduce((winner, file) =>
-          winner.name.compareTo(file.name) <= 0 ? winner : file);
-  final outputStream = OutputStream();
-  firstImage.writeContent(outputStream);
-
-  return Uint8List.fromList(outputStream.getBytes());
+final getBookCover =
+    FutureProvider.autoDispose.family<Uint8List, Book>((ref, book) {
+  return compute(_getBookCover, book);
 });
 
 final libraryFileProvider = FutureProvider((ref) async {
@@ -76,6 +55,32 @@ final sortedBooksProvider =
       throw UnimplementedError('Unsupported sort type: $librarySortType');
   }
 });
+
+Uint8List _getBookCover(Book book) {
+  const extensions = ['.jpeg', '.jpg', '.png'];
+  // TODO(pope): Make this work with app sandbox on MacOS.
+  //
+  // I'm not sure if it's this exactly, or the file picker. What I observed
+  // was that when I used the file_picker, images would load. And the JSON
+  // referenced assets on my Desktop. However, when I restarted the app and
+  // didn't use the file picker, then I would get a file permissions error.
+  //
+  // When going to fix this, adjust the macOS entitlements back to:
+  //     <key>com.apple.security.app-sandbox</key>
+  //     <true/>
+  final inputStream = InputFileStream(book.path);
+  final archive = ZipDecoder().decodeBuffer(inputStream);
+  // TODO(pope): Add some error handling here.
+  // Specifically for when there aren't any images in this archive file.
+  final firstImage = archive
+      .where((file) => extensions.contains(p.extension(file.name)))
+      .reduce((winner, file) =>
+          winner.name.compareTo(file.name) <= 0 ? winner : file);
+  final outputStream = OutputStream();
+  firstImage.writeContent(outputStream);
+
+  return Uint8List.fromList(outputStream.getBytes());
+}
 
 class AddBooksController extends StateNotifier<AsyncValue<void>> {
   final LibraryNotifier libraryNotifier;

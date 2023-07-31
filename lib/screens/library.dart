@@ -16,10 +16,28 @@ class BookCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bytes = ref.watch(getBookCover(book));
     return Column(children: [
-      Image.memory(
-        bytes,
-        height: 350,
-        width: 250,
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        child: bytes.when(
+          data: (data) => Image.memory(
+            data,
+            height: 350,
+            width: 250,
+            key: const ValueKey(true),
+          ),
+          error: (err, stackTrace) => Image.asset(
+            'assets/waiting.png',
+            height: 350,
+            width: 250,
+            key: const ValueKey(false),
+          ),
+          loading: () => Image.asset(
+            'assets/waiting.png',
+            height: 350,
+            width: 250,
+            key: const ValueKey(false),
+          ),
+        ),
       ),
       Text(book.defaultTitle),
     ]);
