@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:dyno/dyno.dart' as dyno;
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_manga_viewer/models/library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:dyno/dyno.dart' as dyno;
 
 final addBooksControllerProvider =
     StateNotifierProvider.autoDispose<AddBooksController, AsyncValue<void>>(
