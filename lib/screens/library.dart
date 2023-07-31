@@ -111,8 +111,7 @@ class LibraryWidget extends ConsumerWidget {
               child: Text('Add some books!'),
             );
           }
-          return Padding(
-            padding: const EdgeInsets.all(20.0),
+          return SafeArea(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 300.0,
