@@ -153,6 +153,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  dyno:
+    dependency: "direct main"
+    description:
+      name: dyno
+      sha256: "872fc8616e6f4bed7d3c869df57a4a911737a88d356b3ea124b7b3e4915f5a16"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
   fake_async:
     dependency: transitive
     description:

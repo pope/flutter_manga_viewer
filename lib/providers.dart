@@ -10,6 +10,7 @@ import 'package:flutter_manga_viewer/models/library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:dyno/dyno.dart' as dyno;
 
 final addBooksControllerProvider =
     StateNotifierProvider.autoDispose<AddBooksController, AsyncValue<void>>(
@@ -22,7 +23,10 @@ final addBooksControllerProvider =
 
 final getBookCover =
     FutureProvider.autoDispose.family<Uint8List, Book>((ref, book) {
-  return compute(_getBookCover, book);
+  return dyno.run(
+    _getBookCover,
+    param1: book.path,
+  );
 });
 
 final libraryFileProvider = FutureProvider((ref) async {
@@ -56,7 +60,7 @@ final sortedBooksProvider =
   }
 });
 
-Uint8List _getBookCover(Book book) {
+Uint8List _getBookCover(String path) {
   const extensions = ['.jpeg', '.jpg', '.png'];
   // TODO(pope): Make this work with app sandbox on MacOS.
   //
@@ -68,7 +72,7 @@ Uint8List _getBookCover(Book book) {
   // When going to fix this, adjust the macOS entitlements back to:
   //     <key>com.apple.security.app-sandbox</key>
   //     <true/>
-  final inputStream = InputFileStream(book.path);
+  final inputStream = InputFileStream(path);
   final archive = ZipDecoder().decodeBuffer(inputStream);
   // TODO(pope): Add some error handling here.
   // Specifically for when there aren't any images in this archive file.

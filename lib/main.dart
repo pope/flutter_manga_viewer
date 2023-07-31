@@ -1,8 +1,10 @@
+import 'package:dyno/dyno.dart' as dyno;
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_viewer/screens/library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
+  dyno.prepare(); // Ignoring return value.
   runApp(const ProviderScope(
     child: MainApp(),
   ));
