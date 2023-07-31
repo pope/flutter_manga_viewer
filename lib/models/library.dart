@@ -14,13 +14,29 @@ class Library {
   Library.fromJson(Map<String, dynamic> json)
       : books = IMap.fromValues(
           keyMapper: (book) => book.id,
-          values: json['books']!.map((b) => Book.fromJson(b)),
+          values: (json['books'] as List<dynamic>)
+              .map((b) => Book.fromJson(b))
+              .toList(),
           config: const ConfigMap(sort: false),
         ),
         version = json['version']!;
 
+  const Library.withVersion({
+    required this.books,
+    required this.version,
+  });
+
   bool get isEmpty {
     return books.isEmpty;
+  }
+
+  Library copyWith({
+    IMap<String, Book>? books,
+  }) {
+    return Library.withVersion(
+      version: version,
+      books: books ?? this.books,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -28,5 +44,11 @@ class Library {
       'version': version,
       'books': books.values.map((b) => b.toJson()).asList(),
     };
+  }
+
+  Library withNewBooks(Iterable<Book> newBooks) {
+    return copyWith(
+        books:
+            books.addEntries(newBooks.map((book) => MapEntry(book.id, book))));
   }
 }

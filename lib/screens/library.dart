@@ -1,35 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LibraryScreen extends StatelessWidget {
+class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Consumer(
-          builder: (context, ref, child) {
-            final books = ref.watch(sortedBooksProvider);
-            return books.when(
-              data: (books) {
-                if (books.isEmpty) {
-                  return const Text('Add some books!');
-                }
-                return const Text('Got something!');
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (err, stackTrace) => Center(
-                child: Text('Error: $err'),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final books = ref.watch(sortedBooksProvider);
+    return books.when(
+      data: (books) => LibraryWidget(
+        books: books,
+      ),
+      loading: () => const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (err, stackTrace) => Scaffold(
+        body: Center(
+          child: Text('Error: $err'),
+        ),
+      ),
+    );
+  }
+}
+
+class LibraryWidget extends ConsumerWidget {
+  final Iterable<Book> books;
+
+  const LibraryWidget({
+    super.key,
+    required this.books,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // If there's an error, show a snackbar about the error.
+    ref.listen<AsyncValue<void>>(
+      addBooksControllerProvider,
+      (prev, cur) {
+        cur.whenOrNull(
+          error: (error, stackTrace) {
+            // show snackbar if an error occurred
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('$error'),
+                showCloseIcon: true,
               ),
             );
           },
-        ),
+        );
+      },
+    );
+
+    final isLoading = ref.watch(addBooksControllerProvider).isLoading;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Library'),
+      ),
+      body: Builder(
+        builder: (context) {
+          if (books.isEmpty) {
+            return const Center(
+              child: Text('Add some books!'),
+            );
+          }
+          return const Text('We have some things!');
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Add books to your library',
+        onPressed: isLoading
+            ? null
+            : () {
+                ref.read(addBooksControllerProvider.notifier).go();
+              },
+        child: const Icon(Icons.add),
       ),
     );
   }
