@@ -1,6 +1,38 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_viewer/models/book.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
+Future<File> getLibraryJsonFile() async {
+  var dir = await getApplicationSupportDirectory();
+  var name = p.join(dir.path, 'library.json');
+  return File(name);
+}
+
+Future<Library> loadLibrary() async {
+  final f = await getLibraryJsonFile();
+  try {
+    final source = await f.readAsString();
+    final json = jsonDecode(source);
+    return Library.fromJson(json);
+  } catch (e) {
+    final lib = Library(
+      books: <String, Book>{}.lock,
+    );
+    await saveLibrary(lib);
+    return lib;
+  }
+}
+
+Future<void> saveLibrary(Library library) async {
+  final f = await getLibraryJsonFile();
+  final json = const JsonEncoder.withIndent("  ").convert(library.toJson());
+  await f.writeAsString(json);
+}
 
 @immutable
 class Library {

@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:archive/archive_io.dart';
 import 'package:dyno/dyno.dart' as dyno;
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
@@ -10,7 +7,6 @@ import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/models/library.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 final addBooksControllerProvider =
     StateNotifierProvider.autoDispose<AddBooksController, AsyncValue<void>>(
@@ -29,23 +25,19 @@ final getBookCover =
   );
 });
 
-final libraryFileProvider = FutureProvider((ref) async {
-  var dir = await getApplicationSupportDirectory();
-  var name = p.join(dir.path, 'library.json');
-  return File(name);
-});
+final initialLibraryProvider =
+    Provider<Library>((ref) => throw UnimplementedError());
 
 final libraryProvider =
-    AsyncNotifierProvider<LibraryNotifier, Library>(() => LibraryNotifier());
+    NotifierProvider<LibraryNotifier, Library>(() => LibraryNotifier());
 
 final librarySortTypeProvider = StateProvider(
   (ref) => LibrarySortType.none,
 );
 
-final sortedBooksProvider =
-    FutureProvider.autoDispose<IList<Book>>((ref) async {
+final sortedBooksProvider = Provider.autoDispose<IList<Book>>((ref) {
   final librarySortType = ref.watch(librarySortTypeProvider);
-  final library = await ref.watch(libraryProvider.future);
+  final library = ref.watch(libraryProvider);
 
   switch (librarySortType) {
     case LibrarySortType.none:
@@ -104,21 +96,10 @@ class AddBooksController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-class LibraryNotifier extends AsyncNotifier<Library> {
+class LibraryNotifier extends Notifier<Library> {
   @override
-  Future<Library> build() async {
-    final f = await ref.read(libraryFileProvider.future);
-    try {
-      final source = await f.readAsString();
-      final json = jsonDecode(source);
-      return Library.fromJson(json);
-    } catch (e) {
-      final lib = Library(
-        books: <String, Book>{}.lock,
-      );
-      await _save(lib);
-      return lib;
-    }
+  Library build() {
+    return ref.read(initialLibraryProvider);
   }
 
   Future<void> pickFilesToAdd() async {
@@ -131,16 +112,10 @@ class LibraryNotifier extends AsyncNotifier<Library> {
       return;
     }
 
-    final newState = state.requireValue
+    final newState = state
         .withNewBooks(result.paths.map((path) => Book.create(path: path!)));
-    await _save(newState);
-    state = AsyncValue.data(newState);
-  }
-
-  Future<void> _save(Library library) async {
-    final f = await ref.read(libraryFileProvider.future);
-    final json = const JsonEncoder.withIndent("  ").convert(library.toJson());
-    await f.writeAsString(json);
+    await saveLibrary(newState);
+    state = newState;
   }
 }
 

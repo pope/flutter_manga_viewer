@@ -1,4 +1,3 @@
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/providers.dart';
@@ -52,34 +51,7 @@ class LibraryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final books = ref.watch(sortedBooksProvider);
-    return books.when(
-      data: (books) => LibraryWidget(
-        books: books,
-      ),
-      loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      error: (err, stackTrace) => Scaffold(
-        body: Center(
-          child: Text('Error: $err'),
-        ),
-      ),
-    );
-  }
-}
 
-class LibraryWidget extends ConsumerWidget {
-  final IList<Book> books;
-
-  const LibraryWidget({
-    super.key,
-    required this.books,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
     // If there's an error, show a snackbar about the error.
     ref.listen<AsyncValue<void>>(
       addBooksControllerProvider,
