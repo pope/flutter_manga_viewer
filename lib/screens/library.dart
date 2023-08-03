@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/providers.dart';
+import 'package:flutter_manga_viewer/screens/book_reader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BookCardWidget extends ConsumerWidget {
@@ -17,35 +18,54 @@ class BookCardWidget extends ConsumerWidget {
     const width = 250.0;
 
     final bytes = ref.watch(getBookCover(book));
-    return Column(children: [
-      AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        child: bytes.when(
-          data: (data) => Image.memory(
-            data,
-            fit: BoxFit.cover,
-            height: height,
-            width: width,
-            key: const ValueKey(true),
-          ),
-          error: (err, stackTrace) => Image.asset(
-            'assets/waiting.png',
-            fit: BoxFit.cover,
-            height: height,
-            width: width,
-            key: const ValueKey(false),
-          ),
-          loading: () => Image.asset(
-            'assets/waiting.png',
-            fit: BoxFit.cover,
-            height: height,
-            width: width,
-            key: const ValueKey(false),
-          ),
+    return TextButton(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.all(10.0),
+        shape: const RoundedRectangleBorder(
+          side: BorderSide.none,
+          borderRadius: BorderRadius.all(Radius.zero),
         ),
       ),
-      Text(book.defaultTitle),
-    ]);
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (builder) => BookReader(
+              book: book,
+            ),
+          ),
+        );
+      },
+      child: Column(children: [
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: bytes.when(
+            data: (data) => Image.memory(
+              data,
+              fit: BoxFit.cover,
+              height: height,
+              width: width,
+              key: const ValueKey(true),
+            ),
+            error: (err, stackTrace) => Image.asset(
+              'assets/waiting.png',
+              fit: BoxFit.cover,
+              height: height,
+              width: width,
+              key: const ValueKey(false),
+            ),
+            loading: () => Image.asset(
+              'assets/waiting.png',
+              fit: BoxFit.cover,
+              height: height,
+              width: width,
+              key: const ValueKey(false),
+            ),
+          ),
+        ),
+        Text(book.defaultTitle),
+      ]),
+    );
   }
 }
 

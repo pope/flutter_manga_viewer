@@ -25,6 +25,14 @@ final getBookCover =
   );
 });
 
+final getBookImages = FutureProvider.autoDispose
+    .family<IList<Uint8List>, Book>((ref, book) async {
+  return dyno.run(
+    _getBookImages,
+    param1: book.path,
+  );
+});
+
 final initialLibraryProvider =
     Provider<Library>((ref) => throw UnimplementedError());
 
@@ -76,6 +84,29 @@ Uint8List _getBookCover(String path) {
   firstImage.writeContent(outputStream);
 
   return Uint8List.fromList(outputStream.getBytes());
+}
+
+IList<Uint8List> _getBookImages(String path) {
+  const extensions = ['.jpeg', '.jpg', '.png'];
+  // TODO(pope): Make this work with app sandbox on MacOS.
+  // See `_getBookCover`.
+  final inputStream = InputFileStream(path);
+  final archive = ZipDecoder().decodeBuffer(inputStream);
+  final candidates = archive
+      .where((file) =>
+          // Ignore non-images
+          extensions.contains(p.extension(file.name)) &&
+          // Ignore hidden files. Looking at you MacOS making __MACOSX
+          // directories in your zip files.
+          !p.basename(file.name).startsWith('.'))
+      .asList();
+  candidates.sort((a, b) => a.name.compareTo(b.name));
+  final images = candidates.map((file) {
+    var outputStream = OutputStream();
+    file.writeContent(outputStream);
+    return Uint8List.fromList(outputStream.getBytes());
+  });
+  return IList(images);
 }
 
 class AddBooksController extends StateNotifier<AsyncValue<void>> {
