@@ -13,6 +13,9 @@ class BookCardWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    const height = 350.0;
+    const width = 250.0;
+
     final bytes = ref.watch(getBookCover(book));
     return Column(children: [
       AnimatedSwitcher(
@@ -20,20 +23,23 @@ class BookCardWidget extends ConsumerWidget {
         child: bytes.when(
           data: (data) => Image.memory(
             data,
-            height: 350,
-            width: 250,
+            fit: BoxFit.cover,
+            height: height,
+            width: width,
             key: const ValueKey(true),
           ),
           error: (err, stackTrace) => Image.asset(
             'assets/waiting.png',
-            height: 350,
-            width: 250,
+            fit: BoxFit.cover,
+            height: height,
+            width: width,
             key: const ValueKey(false),
           ),
           loading: () => Image.asset(
             'assets/waiting.png',
-            height: 350,
-            width: 250,
+            fit: BoxFit.cover,
+            height: height,
+            width: width,
             key: const ValueKey(false),
           ),
         ),
@@ -84,11 +90,13 @@ class LibraryScreen extends ConsumerWidget {
             );
           }
           return SafeArea(
+            minimum: const EdgeInsets.all(20.0),
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 300.0,
-                childAspectRatio: .6,
                 crossAxisSpacing: 20.0,
+                mainAxisExtent: 400.0,
+                mainAxisSpacing: 10.0,
               ),
               itemCount: books.length,
               itemBuilder: (BuildContext itemContext, int index) =>
