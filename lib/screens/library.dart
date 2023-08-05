@@ -38,35 +38,42 @@ class BookCardWidget extends ConsumerWidget {
           ),
         );
       },
-      child: Column(children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          child: bytes.when(
-            data: (data) => Image.memory(
-              data,
-              fit: BoxFit.cover,
-              height: height,
-              width: width,
-              key: const ValueKey(true),
-            ),
-            error: (err, stackTrace) => Image.asset(
-              'assets/waiting.png',
-              fit: BoxFit.cover,
-              height: height,
-              width: width,
-              key: const ValueKey(false),
-            ),
-            loading: () => Image.asset(
-              'assets/waiting.png',
-              fit: BoxFit.cover,
-              height: height,
-              width: width,
-              key: const ValueKey(false),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 20.0),
+        child: Column(children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: bytes.when(
+              data: (data) => Image.memory(
+                data,
+                fit: BoxFit.cover,
+                height: height,
+                width: width,
+                key: const ValueKey(true),
+              ),
+              error: (err, stackTrace) => Image.asset(
+                'assets/waiting.png',
+                fit: BoxFit.cover,
+                height: height,
+                width: width,
+                key: const ValueKey(false),
+              ),
+              loading: () => Image.asset(
+                'assets/waiting.png',
+                fit: BoxFit.cover,
+                height: height,
+                width: width,
+                key: const ValueKey(false),
+              ),
             ),
           ),
-        ),
-        Text(book.defaultTitle),
-      ]),
+          Text(
+            book.defaultTitle,
+            maxLines: 1,
+            style: const TextStyle(overflow: TextOverflow.ellipsis),
+          ),
+        ]),
+      ),
     );
   }
 }
@@ -117,10 +124,8 @@ class LibraryScreen extends ConsumerWidget {
             child: GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount:
-                    math.max((mediaQuery.size.width / 300).floor(), 1),
-                crossAxisSpacing: 20.0,
-                mainAxisExtent: 400.0,
-                mainAxisSpacing: 10.0,
+                    math.max((mediaQuery.size.width / 250).floor(), 1),
+                mainAxisExtent: 420.0,
               ),
               itemCount: books.length,
               itemBuilder: (BuildContext itemContext, int index) =>
