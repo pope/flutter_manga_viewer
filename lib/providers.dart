@@ -25,12 +25,21 @@ final getBookCover =
   );
 });
 
-final getBookImages = FutureProvider.autoDispose
-    .family<IList<Uint8List>, Book>((ref, book) async {
+final getBookImage = FutureProvider.autoDispose
+    .family<Uint8List, (Book, int)>((ref, args) async {
+  final (book, index) = args;
+  if (index == 0) {
+    return ref.read(getBookCover(book).future);
+  }
   return dyno.run(
-    _getBookImages,
+    _getBookImage,
     param1: book.path,
+    param2: index,
   );
+});
+
+final getBookImagesCount = Provider.autoDispose.family<int, Book>((ref, book) {
+  return _getArchiveBookFiles(book.path).length;
 });
 
 final initialLibraryProvider =
@@ -60,7 +69,7 @@ final sortedBooksProvider = Provider.autoDispose<IList<Book>>((ref) {
   }
 });
 
-Uint8List _getBookCover(String path) {
+Iterable<ArchiveFile> _getArchiveBookFiles(String path) {
   const extensions = ['.jpeg', '.jpg', '.png'];
   // TODO(pope): Make this work with app sandbox on MacOS.
   //
@@ -76,37 +85,35 @@ Uint8List _getBookCover(String path) {
   final archive = ZipDecoder().decodeBuffer(inputStream);
   // TODO(pope): Add some error handling here.
   // Specifically for when there aren't any images in this archive file.
-  final firstImage = archive
-      .where((file) => extensions.contains(p.extension(file.name)))
-      .reduce((winner, file) =>
-          winner.name.compareTo(file.name) <= 0 ? winner : file);
+  return archive.where((file) =>
+      // Ignore non-images
+      extensions.contains(p.extension(file.name)) &&
+      // Ignore hidden files. Looking at you MacOS making __MACOSX
+      // directories in your zip files.
+      !p.basename(file.name).startsWith('.'));
+}
+
+Uint8List _getBookCover(String path) {
+  final firstImage = _getArchiveBookFiles(path).reduce(
+      (winner, file) => winner.name.compareTo(file.name) <= 0 ? winner : file);
   final outputStream = OutputStream();
   firstImage.writeContent(outputStream);
 
   return Uint8List.fromList(outputStream.getBytes());
 }
 
-IList<Uint8List> _getBookImages(String path) {
-  const extensions = ['.jpeg', '.jpg', '.png'];
-  // TODO(pope): Make this work with app sandbox on MacOS.
-  // See `_getBookCover`.
-  final inputStream = InputFileStream(path);
-  final archive = ZipDecoder().decodeBuffer(inputStream);
-  final candidates = archive
-      .where((file) =>
-          // Ignore non-images
-          extensions.contains(p.extension(file.name)) &&
-          // Ignore hidden files. Looking at you MacOS making __MACOSX
-          // directories in your zip files.
-          !p.basename(file.name).startsWith('.'))
-      .asList();
+Uint8List _getBookImage(String path, int index) {
+  final candidates = _getArchiveBookFiles(path).asList();
+  if (index < 0 || index >= candidates.length) {
+    throw Exception('index out of bounds');
+  }
+
   candidates.sort((a, b) => a.name.compareTo(b.name));
-  final images = candidates.map((file) {
-    var outputStream = OutputStream();
-    file.writeContent(outputStream);
-    return Uint8List.fromList(outputStream.getBytes());
-  });
-  return IList(images);
+
+  final file = candidates[index];
+  var outputStream = OutputStream();
+  file.writeContent(outputStream);
+  return Uint8List.fromList(outputStream.getBytes());
 }
 
 class AddBooksController extends StateNotifier<AsyncValue<void>> {

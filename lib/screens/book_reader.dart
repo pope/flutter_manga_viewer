@@ -26,40 +26,49 @@ class _BookReaderState extends State<BookReader> {
       ),
       body: Center(
         child: Consumer(builder: (context, ref, child) {
-          final images = ref.watch(getBookImages(widget.book));
+          final imageCount = ref.watch(getBookImagesCount(widget.book));
+          final image = ref.watch(getBookImage((widget.book, _pageNum)));
 
-          return images.when(
-            data: (data) {
-              return CallbackShortcuts(
-                bindings: <ShortcutActivator, VoidCallback>{
-                  const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
-                    if (_pageNum > 0) {
-                      setState(() => _pageNum--);
-                    }
+          return CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+                if (_pageNum > 0) {
+                  setState(() => _pageNum--);
+                }
+              },
+              const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+                if (_pageNum < imageCount - 1) {
+                  setState(() => _pageNum++);
+                }
+              },
+            },
+            child: Focus(
+              autofocus: true,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 100),
+                child: image.when(
+                  data: (data) => Image.memory(
+                    data,
+                    key: ValueKey(_pageNum),
+                  ),
+                  error: (error, stackTrace) {
+                    log(
+                      'Unable to load image',
+                      error: error,
+                      stackTrace: stackTrace,
+                    );
+                    return Center(
+                      key: ValueKey(_pageNum * 31 + 1),
+                      child: Text('Oops: ${_pageNum + 1}'),
+                    );
                   },
-                  const SingleActivator(LogicalKeyboardKey.arrowRight): () {
-                    if (_pageNum < data.length - 1) {
-                      setState(() => _pageNum++);
-                    }
-                  },
-                },
-                child: Focus(
-                  autofocus: true,
-                  child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 60),
-                      child: Image.memory(
-                        data[_pageNum],
-                        key: ValueKey(_pageNum),
-                      )),
+                  loading: () => Center(
+                    key: ValueKey(_pageNum * 31),
+                    child: Text('${_pageNum + 1}'),
+                  ),
                 ),
-              );
-            },
-            error: (err, stack) {
-              // TODO(pope): Handle this
-              log('Unable to show images', error: err, stackTrace: stack);
-              return const CircularProgressIndicator();
-            },
-            loading: () => const CircularProgressIndicator(),
+              ),
+            ),
           );
         }),
       ),
