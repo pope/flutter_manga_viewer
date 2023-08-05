@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_manga_viewer/models/book.dart';
 import 'package:flutter_manga_viewer/providers.dart';
@@ -97,6 +99,7 @@ class LibraryScreen extends ConsumerWidget {
     );
 
     final isLoading = ref.watch(addBooksControllerProvider).isLoading;
+    final mediaQuery = MediaQuery.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -112,8 +115,9 @@ class LibraryScreen extends ConsumerWidget {
           return SafeArea(
             minimum: const EdgeInsets.all(20.0),
             child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 300.0,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount:
+                    math.max((mediaQuery.size.width / 300).floor(), 1),
                 crossAxisSpacing: 20.0,
                 mainAxisExtent: 400.0,
                 mainAxisSpacing: 10.0,
