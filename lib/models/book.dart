@@ -38,11 +38,13 @@ class Book {
 
   @override
   bool operator ==(Object other) =>
-      other is Book &&
-      other.id == id &&
-      other.path == path &&
-      other.author == author &&
-      other.title == title;
+      identical(this, other) ||
+      (other.runtimeType == runtimeType &&
+          other is Book &&
+          other.id == id &&
+          other.path == path &&
+          other.author == author &&
+          other.title == title);
 
   Book copyWith({
     String? author,
