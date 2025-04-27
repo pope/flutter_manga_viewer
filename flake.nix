@@ -6,6 +6,10 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
   outputs = { nixpkgs, systems, treefmt-nix, ... }:
@@ -63,7 +67,7 @@
               xz.dev
             ];
 
-            ANDROID_SDK_ROOT="${androidSdk}/libexec/android-sdk";
+            ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
             JAVA_HOME = "${jdk23}";
           };
         });
